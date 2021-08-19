@@ -1,0 +1,23 @@
+KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDH", "BC");
+
+        ECGenParameterSpec ecsp;
+        ecsp = new ECGenParameterSpec("secp192r1");
+
+        keyGen.initialize(ecsp, new SecureRandom());
+        // Generate RSA Assymetric KeyPair
+        KeyPair alice_pair = keyGen.generateKeyPair();
+        // Extract Public Key
+        PublicKey alice_pub =  alice_pair.getPublic();
+        // Extract Private Key
+        PrivateKey alice_pvt = alice_pair.getPrivate();
+
+  KeyAgreement alice_agreement =    KeyAgreement.getInstance("ECDH","BC");
+        alice_agreement.init(alice_pair.getPrivate());
+        alice_agreement.doPhase(bob_pub, true);
+        byte[] alice_secret = alice_agreement.generateSecret();
+        SecretKeySpec alice_aes = new SecretKeySpec(alice_secret, "AES");
+
+        // Create KeyAgreement for Bob
+        KeyAgreement bob_agreement = KeyAgreement.getInstance("ECDH","BC");
+        bob_agreement.init(bob_pvt);
+        bob_agreement.doPhase(alice_pub, true); 
